@@ -1,0 +1,9 @@
+[submodule "JM-CompanyAuthService"]
+	path = JM-CompanyAuthService
+	url = https://github.com/Saint-Giong/JM-CompanyAuthService.git
+[submodule "JM-CompanyProfileService"]
+	path = JM-CompanyProfileService
+	url = https://github.com/Saint-Giong/JM-CompanyProfileService.git
+[submodule "SG-SharedDtoPackage"]
+	path = SG-SharedDtoPackage
+	url = https://github.com/Saint-Giong/SG-SharedDtoPackage
