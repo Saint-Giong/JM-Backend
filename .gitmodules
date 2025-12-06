@@ -7,3 +7,9 @@
 [submodule "SG-SharedDtoPackage"]
 	path = SG-SharedDtoPackage
 	url = https://github.com/Saint-Giong/SG-SharedDtoPackage
+[submodule "JM-Gateway"]
+	path = JM-Gateway
+	url = https://github.com/Saint-Giong/JM-Gateway
+[submodule "JM-Eureka"]
+	path = JM-Eureka
+	url = https://github.com/Saint-Giong/JM-Eureka.git
