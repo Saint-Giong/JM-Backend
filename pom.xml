@@ -19,6 +19,8 @@
     <modules>
         <module>JM-CompanyAuthService</module>
         <module>JM-CompanyProfileService</module>
+        <module>JM-Eureka</module>
+        <module>JM-Gateway</module>
         <module>SG-SharedDtoPackage</module>
     </modules>
 
