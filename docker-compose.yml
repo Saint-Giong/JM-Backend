@@ -1,0 +1,99 @@
+services:
+  # Infrastructure
+  eureka-server:
+    build:
+      context: ./JM-Eureka
+    image: jm/eureka-server
+    container_name: company-eureka-server
+    profiles: [ "infra", "all" ]
+    ports:
+      - "8070:8070"
+    environment:
+      EUREKA_INSTANCE_HOSTNAME: eureka-server
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8070/actuator/health/readiness || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
+
+  gateway:
+    build:
+      context: ./JM-Gateway
+    image: jm/gateway-server
+    container_name: company-gateway-server
+    profiles: [ "infra", "all" ]
+    ports:
+      - "8072:8072"
+    environment:
+      EUREKA_INSTANCE_HOSTNAME: eureka-server
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --fail --silent http://localhost:8072/actuator/health/readiness || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
+
+  # Services
+  auth-service:
+    build:
+      context: ./JM-CompanyAuthService
+#      args:
+#        GITHUB_USERNAME: ${GITHUB_USERNAME}
+#        GITHUB_KEY: ${GITHUB_KEY}
+    image: jm/company-auth-service
+    container_name: company-auth-service
+    profiles: ["auth", "all"]
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/auth_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      auth-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8080/actuator/health/readiness | grep UP || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
+
+  # Databases
+  auth-db:
+    image: postgres:latest
+    container_name: company-auth-db
+    profiles: ["auth", "all"]
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d auth_db || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
+
+networks:
+  job-manager:
+    driver: bridge
