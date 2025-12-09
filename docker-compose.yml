@@ -47,9 +47,9 @@ services:
   auth-service:
     build:
       context: ./JM-CompanyAuthService
-#      args:
-#        GITHUB_USERNAME: ${GITHUB_USERNAME}
-#        GITHUB_KEY: ${GITHUB_KEY}
+      secrets:
+        - GITHUB_USERNAME
+        - GITHUB_KEY
     image: jm/company-auth-service
     container_name: company-auth-service
     profiles: ["auth", "all"]
@@ -93,6 +93,12 @@ services:
       start_period: 10s
     networks:
       - job-manager
+
+secrets:
+  GITHUB_USERNAME:
+    environment: GITHUB_USERNAME
+  GITHUB_KEY:
+    environment: GITHUB_KEY
 
 networks:
   job-manager:
