@@ -13,3 +13,6 @@
 [submodule "JM-Gateway"]
 	path = JM-Gateway
 	url = https://github.com/Saint-Giong/JM-Gateway
+[submodule "JM-ApplicantDiscoveryService"]
+	path = JM-ApplicantDiscoveryService
+	url = https://github.com/Saint-Giong/JM-ApplicantDiscoveryService
