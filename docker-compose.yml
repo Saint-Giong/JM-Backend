@@ -43,6 +43,25 @@ services:
     networks:
       - job-manager
 
+  # Redis for token storage
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    profiles: [ "infra", "all" ]
+    depends_on:
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - job-manager
+
   # Services
   auth-service:
     build:
@@ -55,11 +74,15 @@ services:
     profiles: ["auth", "all"]
     ports:
       - "8080:8080"
+    env_file:
+      - ./JM-CompanyAuthService/CompanyAuthService/.auth.env
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/auth_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
+      REDIS_HOST: redis
+      REDIS_PASSWORD:
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -101,11 +124,11 @@ services:
     ports:
       - "5434:5432"
     environment:
-      POSTGRES_DB: discovery
+      POSTGRES_DB: discovery_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d auth_db || exit 1" ]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d discovery_db || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 10
