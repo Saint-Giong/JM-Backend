@@ -51,9 +51,6 @@ services:
     ports:
       - "6379:6379"
     command: redis-server --appendonly yes
-    depends_on:
-      auth-service:
-        condition: service_healthy
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
@@ -76,7 +73,7 @@ services:
     ports:
       - "8080:8080"
     env_file:
-      - ./JM-CompanyAuthService/.auth.env
+      - ./JM-CompanyAuthService/CompanyAuthService/.auth.env
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/auth_db
       SPRING_DATASOURCE_USERNAME: postgres
@@ -88,6 +85,8 @@ services:
       eureka-server:
         condition: service_healthy
       auth-db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "curl --fail --silent http://localhost:8080/actuator/health/readiness | grep UP || exit 1"]
