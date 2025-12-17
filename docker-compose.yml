@@ -81,6 +81,10 @@ services:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
       REDIS_HOST: redis
       REDIS_PASSWORD:
+      JWE_PUBLIC_KEY_PATH: classpath:keys/public_key.pem
+      JWE_PRIVATE_KEY_PATH: classpath:keys/private_key.pem
+      OAUTH2_CLIENT_ID: ${OAUTH2_CLIENT_ID}
+      OAUTH2_CLIENT_SECRET: ${OAUTH2_CLIENT_SECRET}
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -119,7 +123,7 @@ services:
 
   discovery-db:
     image: postgres:latest
-    container_name: discovery-db
+    container_name: company-discovery-db
     profiles: [ "discovery", "all" ]
     ports:
       - "5434:5432"
