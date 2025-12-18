@@ -1,5 +1,5 @@
 services:
-  # Infrastructure
+  # ============================= Infrastructure =============================
   eureka-server:
     build:
       context: ./JM-Eureka
@@ -43,7 +43,6 @@ services:
     networks:
       - job-manager
 
-  # Redis for token storage
   redis:
     image: redis:7-alpine
     container_name: company-auth-redis
@@ -60,7 +59,7 @@ services:
     networks:
       - job-manager
 
-  # Services
+  # ============================= Services =============================
   auth-service:
     build:
       context: ./JM-CompanyAuthService
@@ -101,7 +100,39 @@ services:
     networks:
       - job-manager
 
-  # Databases
+  profile-service:
+    build:
+      context: ./JM-CompanyProfileService
+      secrets:
+        - GITHUB_USERNAME
+        - GITHUB_KEY
+    image: jm/company-profile-service
+    container_name: company-profile-service
+    profiles: [ "profile", "all" ]
+    ports:
+      - "8081:8081"
+    env_file:
+      - ./JM-CompanyProfileService/CompanyProfileService/.profile.env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://profile-db:5432/profile_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      profile-db:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --fail --silent http://localhost:8081/actuator/health/readiness | grep UP || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
+
+  # ============================= Databases =============================
   auth-db:
     image: postgres:latest
     container_name: company-auth-db
@@ -121,12 +152,31 @@ services:
     networks:
       - job-manager
 
+  profile-db:
+    image: postgres:latest
+    container_name: company-profile-db
+    profiles: [ "profile", "all" ]
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_DB: profile_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d profile_db || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
+
   discovery-db:
     image: postgres:latest
     container_name: company-discovery-db
     profiles: [ "discovery", "all" ]
     ports:
-      - "5434:5432"
+      - "5435:5432"
     environment:
       POSTGRES_DB: discovery_db
       POSTGRES_USER: postgres
