@@ -5,7 +5,6 @@ services:
       context: ./JM-Eureka
     image: jm/eureka-server
     container_name: company-eureka-server
-    profiles: [ "infra", "all" ]
     ports:
       - "8070:8070"
     environment:
@@ -24,7 +23,6 @@ services:
       context: ./JM-Gateway
     image: jm/gateway-server
     container_name: company-gateway-server
-    profiles: [ "infra", "all" ]
     ports:
       - "8072:8072"
     environment:
@@ -43,27 +41,10 @@ services:
     networks:
       - job-manager
 
-  redis:
-    image: redis:7-alpine
-    container_name: company-auth-redis
-    profiles: [ "infra", "all" ]
-    ports:
-      - "6379:6379"
-    command: redis-server --appendonly yes
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-    networks:
-      - job-manager
-
   kafka:
     image: confluentinc/cp-kafka:latest
     hostname: kafka
-    container_name: kafka
-    profiles: [ "infra", "all" ]
+    container_name: company-kafka
     ports:
       - "9092:9092"
       - "9093:9093"
@@ -104,9 +85,6 @@ services:
     image: confluentinc/cp-schema-registry:latest
     hostname: schema-registry
     container_name: schema-registry
-    profiles: [ "infra", "all" ]
-    depends_on:
-      - kafka
     ports:
       - "9091:9091"
     environment:
@@ -114,6 +92,8 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:29092'
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:9091
       SCHEMA_REGISTRY_KAFKASTORE_TOPIC_CONFIG_CLEANUP_POLICY: "compact"
+    depends_on:
+      - kafka
     restart: on-failure
     networks:
       - job-manager
@@ -127,7 +107,6 @@ services:
         - GITHUB_KEY
     image: jm/company-auth-service
     container_name: company-auth-service
-    profiles: ["auth", "all"]
     ports:
       - "8080:8080"
     env_file:
@@ -167,7 +146,6 @@ services:
         - GITHUB_KEY
     image: jm/company-profile-service
     container_name: company-profile-service
-    profiles: [ "profile", "all" ]
     ports:
       - "8081:8081"
     env_file:
@@ -195,7 +173,6 @@ services:
   auth-db:
     image: postgres:latest
     container_name: company-auth-db
-    profiles: ["auth", "all"]
     ports:
       - "5433:5432"
     environment:
@@ -214,7 +191,6 @@ services:
   profile-db:
     image: postgres:latest
     container_name: company-profile-db
-    profiles: [ "profile", "all" ]
     ports:
       - "5434:5432"
     environment:
@@ -233,7 +209,6 @@ services:
   discovery-db:
     image: postgres:latest
     container_name: company-discovery-db
-    profiles: [ "discovery", "all" ]
     ports:
       - "5435:5432"
     environment:
@@ -245,6 +220,22 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
+
+  # ============================= REDIS =============================
+  redis:
+    image: redis:7-alpine
+    container_name: company-auth-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
       start_period: 10s
     networks:
       - job-manager
