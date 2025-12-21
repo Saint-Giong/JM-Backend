@@ -114,6 +114,8 @@ services:
       secrets:
         - GITHUB_USERNAME
         - GITHUB_KEY
+      cache_from:
+        - jm/company-auth-service:latest
     image: jm/company-auth-service
     command: ["java", "-jar", "/app/auth-service.jar"]
     container_name: company-auth-service
@@ -159,6 +161,8 @@ services:
       secrets:
         - GITHUB_USERNAME
         - GITHUB_KEY
+      cache_from:
+        - jm/company-profile-service:latest
     image: jm/company-profile-service
     command: ["java", "-jar", "/app/profile-service.jar"]
     container_name: company-profile-service
