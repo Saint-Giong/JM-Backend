@@ -109,11 +109,13 @@ services:
   # ============================= Services =============================
   auth-service:
     build:
-      context: ./JM-CompanyAuthService
+      context: .
+      dockerfile: Dockerfile
       secrets:
         - GITHUB_USERNAME
         - GITHUB_KEY
     image: jm/company-auth-service
+    command: ["java", "-jar", "/app/auth-service.jar"]
     container_name: company-auth-service
     ports:
       - "8180:8080"
@@ -152,11 +154,13 @@ services:
 
   profile-service:
     build:
-      context: ./JM-CompanyProfileService
+      context: .
+      dockerfile: Dockerfile
       secrets:
         - GITHUB_USERNAME
         - GITHUB_KEY
     image: jm/company-profile-service
+    command: ["java", "-jar", "/app/profile-service.jar"]
     container_name: company-profile-service
     ports:
       - "8181:8081"
