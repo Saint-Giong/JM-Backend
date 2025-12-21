@@ -15,14 +15,30 @@ RUN chmod +x mvnw
 # Copy root POM
 COPY pom.xml ./pom.xml
 
-# Copy all service POMs (these rarely change, so they cache well)
+# Copy ALL module POMs (required for Maven to resolve multi-module structure)
+# SG-SharedDtoPackage
 COPY SG-SharedDtoPackage/pom.xml ./SG-SharedDtoPackage/pom.xml
+
+# JM-CompanyAuthService (multi-module)
 COPY JM-CompanyAuthService/pom.xml ./JM-CompanyAuthService/pom.xml
 COPY JM-CompanyAuthService/CompanyAuthApi/pom.xml ./JM-CompanyAuthService/CompanyAuthApi/pom.xml
 COPY JM-CompanyAuthService/CompanyAuthService/pom.xml ./JM-CompanyAuthService/CompanyAuthService/pom.xml
+
+# JM-CompanyProfileService (multi-module)
 COPY JM-CompanyProfileService/pom.xml ./JM-CompanyProfileService/pom.xml
 COPY JM-CompanyProfileService/CompanyProfileApi/pom.xml ./JM-CompanyProfileService/CompanyProfileApi/pom.xml
 COPY JM-CompanyProfileService/CompanyProfileService/pom.xml ./JM-CompanyProfileService/CompanyProfileService/pom.xml
+
+# JM-ApplicantDiscoveryService (multi-module)
+COPY JM-ApplicantDiscoveryService/pom.xml ./JM-ApplicantDiscoveryService/pom.xml
+COPY JM-ApplicantDiscoveryService/ApplicantDiscoveryApi/pom.xml ./JM-ApplicantDiscoveryService/ApplicantDiscoveryApi/pom.xml
+COPY JM-ApplicantDiscoveryService/ApplicantDiscoveryService/pom.xml ./JM-ApplicantDiscoveryService/ApplicantDiscoveryService/pom.xml
+
+# JM-Eureka
+COPY JM-Eureka/pom.xml ./JM-Eureka/pom.xml
+
+# JM-Gateway
+COPY JM-Gateway/pom.xml ./JM-Gateway/pom.xml
 
 # Copy settings.xml for GitHub packages access
 COPY JM-CompanyAuthService/settings.xml /
