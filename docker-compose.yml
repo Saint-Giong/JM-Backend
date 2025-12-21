@@ -10,7 +10,11 @@ services:
     environment:
       EUREKA_INSTANCE_HOSTNAME: eureka-server
     healthcheck:
-      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8070/actuator/health/readiness || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "curl --fail --silent http://localhost:8070/actuator/health/readiness || exit 1",
+        ]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -33,7 +37,11 @@ services:
       auth-service:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD-SHELL", "curl --fail --silent http://localhost:8072/actuator/health/readiness || exit 1" ]
+      test:
+        [
+          "CMD-SHELL",
+          "curl --fail --silent http://localhost:8072/actuator/health/readiness || exit 1",
+        ]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -46,30 +54,30 @@ services:
     hostname: kafka
     container_name: company-kafka
     ports:
-      - "9092:9092"
-      - "9093:9093"
+      - "9192:9092"
+      - "9193:9093"
     environment:
       KAFKA_NODE_ID: 1
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT"
 
       # 1. CONTROLLER: 9093 (Quản lý Cluster)
       # 2. PLAINTEXT: 29092 (Nội bộ Docker - Cho Schema Registry dùng)
       # 3. PLAINTEXT_HOST: 9092 (Bên ngoài - Cho Spring Boot dùng)
-      KAFKA_LISTENERS: 'PLAINTEXT://kafka:29092,CONTROLLER://kafka:9093,PLAINTEXT_HOST://0.0.0.0:9092'
+      KAFKA_LISTENERS: "PLAINTEXT://kafka:29092,CONTROLLER://kafka:9093,PLAINTEXT_HOST://0.0.0.0:9092"
 
       # - Nội bộ: kafka:29092
       # - Bên ngoài: localhost:9092
-      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:29092,PLAINTEXT_HOST://kafka:9092'
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:29092,PLAINTEXT_HOST://kafka:9092"
 
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_PROCESS_ROLES: 'broker,controller'
-      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:9093'
-      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
-      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
-      CLUSTER_ID: 'Mk3OEYBSD34fcwNTJENDW233'
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_LOG_DIRS: "/tmp/kraft-combined-logs"
+      CLUSTER_ID: "Mk3OEYBSD34fcwNTJENDW233"
     healthcheck: # Kiểm tra Kafka sống chưa trước khi bật Schema Registry
       test: nc -z localhost 9092 || exit 1
       interval: 10s
@@ -83,13 +91,13 @@ services:
 
   schema-registry:
     image: confluentinc/cp-schema-registry:latest
-    hostname: schema-registry
-    container_name: schema-registry
+    hostname: jm-schema-registry
+    container_name: jm-schema-registry
     ports:
-      - "9091:9091"
+      - "9191:9091"
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:29092'
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: "kafka:29092"
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:9091
       SCHEMA_REGISTRY_KAFKASTORE_TOPIC_CONFIG_CLEANUP_POLICY: "compact"
     depends_on:
@@ -108,7 +116,7 @@ services:
     image: jm/company-auth-service
     container_name: company-auth-service
     ports:
-      - "8080:8080"
+      - "8180:8080"
     env_file:
       - ./JM-CompanyAuthService/CompanyAuthService/.auth.env
     environment:
@@ -130,7 +138,11 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8080/actuator/health/readiness | grep UP || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "curl --fail --silent http://localhost:8080/actuator/health/readiness | grep UP || exit 1",
+        ]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -147,7 +159,7 @@ services:
     image: jm/company-profile-service
     container_name: company-profile-service
     ports:
-      - "8081:8081"
+      - "8181:8081"
     env_file:
       - ./JM-CompanyProfileService/CompanyProfileService/.profile.env
     environment:
@@ -161,7 +173,11 @@ services:
       profile-db:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD-SHELL", "curl --fail --silent http://localhost:8081/actuator/health/readiness | grep UP || exit 1" ]
+      test:
+        [
+          "CMD-SHELL",
+          "curl --fail --silent http://localhost:8081/actuator/health/readiness | grep UP || exit 1",
+        ]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -174,13 +190,13 @@ services:
     image: postgres:latest
     container_name: company-auth-db
     ports:
-      - "5433:5432"
+      - "5533:5432"
     environment:
       POSTGRES_DB: auth_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d auth_db || exit 1" ]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d auth_db || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -192,13 +208,13 @@ services:
     image: postgres:latest
     container_name: company-profile-db
     ports:
-      - "5434:5432"
+      - "5534:5432"
     environment:
       POSTGRES_DB: profile_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d profile_db || exit 1" ]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d profile_db || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -210,13 +226,13 @@ services:
     image: postgres:latest
     container_name: company-discovery-db
     ports:
-      - "5435:5432"
+      - "5535:5432"
     environment:
       POSTGRES_DB: discovery_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d discovery_db || exit 1" ]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d discovery_db || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -229,10 +245,10 @@ services:
     image: redis:7-alpine
     container_name: company-auth-redis
     ports:
-      - "6379:6379"
+      - "6479:6379"
     command: redis-server --appendonly yes
     healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
