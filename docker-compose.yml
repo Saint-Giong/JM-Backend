@@ -29,6 +29,8 @@ services:
     container_name: company-gateway-server
     ports:
       - "8072:8072"
+    env_file:
+      - ./JM-Gateway/.env
     environment:
       EUREKA_INSTANCE_HOSTNAME: eureka-server
     depends_on:
