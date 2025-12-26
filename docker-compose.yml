@@ -24,13 +24,17 @@ services:
 
   gateway:
     build:
-      context: ./JM-Gateway
+      context: .
+      dockerfile: JM-Gateway/Dockerfile
+      secrets:
+        - GITHUB_USERNAME
+        - GITHUB_KEY
     image: jm/gateway-server
     container_name: company-gateway-server
     ports:
       - "8072:8072"
     env_file:
-      - ./JM-Gateway/.env
+      - ./.env
     environment:
       EUREKA_INSTANCE_HOSTNAME: eureka-server
     depends_on:
@@ -112,14 +116,14 @@ services:
   auth-service:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: JM-CompanyAuthService/Dockerfile
       secrets:
         - GITHUB_USERNAME
         - GITHUB_KEY
       cache_from:
         - jm/company-auth-service:latest
     image: jm/company-auth-service
-    command: ["java", "-jar", "/app/auth-service.jar"]
+#    command: ["java", "-jar", "/app/auth-service.jar"]
     container_name: company-auth-service
     ports:
       - "8180:8080"
@@ -132,8 +136,6 @@ services:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
       REDIS_HOST: redis
       REDIS_PASSWORD:
-      JWE_PUBLIC_KEY_PATH: classpath:keys/public_key.pem
-      JWE_PRIVATE_KEY_PATH: classpath:keys/private_key.pem
       OAUTH2_CLIENT_ID: ${OAUTH2_CLIENT_ID}
       OAUTH2_CLIENT_SECRET: ${OAUTH2_CLIENT_SECRET}
     depends_on:
@@ -147,7 +149,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "curl --fail --silent http://localhost:8080/actuator/health/readiness | grep UP || exit 1",
+          "curl --fail --silent http://localhost:8180/actuator/health/readiness | grep UP || exit 1",
         ]
       interval: 10s
       timeout: 5s
@@ -159,14 +161,14 @@ services:
   profile-service:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: JM-CompanyProfileService/Dockerfile
       secrets:
         - GITHUB_USERNAME
         - GITHUB_KEY
       cache_from:
         - jm/company-profile-service:latest
     image: jm/company-profile-service
-    command: ["java", "-jar", "/app/profile-service.jar"]
+#    command: ["java", "-jar", "/app/profile-service.jar"]
     container_name: company-profile-service
     ports:
       - "8181:8081"
@@ -243,6 +245,24 @@ services:
       POSTGRES_PASSWORD: postgres
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d discovery_db || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
+
+  subscription-db:
+    image: postgres:latest
+    container_name: company-subscription-db
+    ports:
+      - "5540:5432"
+    environment:
+      POSTGRES_DB: subscription_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d subscription_db || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 10
