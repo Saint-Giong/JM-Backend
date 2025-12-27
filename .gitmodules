@@ -16,3 +16,15 @@
 [submodule "JM-ApplicantDiscoveryService"]
 	path = JM-ApplicantDiscoveryService
 	url = https://github.com/Saint-Giong/JM-ApplicantDiscoveryService
+[submodule "JM-CompanyMediaService"]
+	path = JM-CompanyMediaService
+	url = https://github.com/Saint-Giong/JM-CompanyMediaService.git
+[submodule "JM-CompanySubscriptionService"]
+	path = JM-CompanySubscriptionService
+	url = https://github.com/Saint-Giong/JM-CompanySubscriptionService.git
+[submodule "JM-JobPostService"]
+	path = JM-JobPostService
+	url = https://github.com/Saint-Giong/JM-JobPostService.git
+[submodule "JM-SkillTag"]
+	path = JM-SkillTag
+	url = https://github.com/Saint-Giong/JM-SkillTag.git
