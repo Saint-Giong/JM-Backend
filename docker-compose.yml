@@ -36,7 +36,6 @@ services:
     container_name: company-gateway-server
     profiles:
       - "all"
-      - "infra"
     ports:
       - "8072:8072"
     env_file:
