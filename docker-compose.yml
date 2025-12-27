@@ -45,8 +45,8 @@ services:
     depends_on:
       eureka-server:
         condition: service_healthy
-      auth-service:
-        condition: service_healthy
+#      auth-service:
+#        condition: service_healthy
     healthcheck:
       test:
         [
