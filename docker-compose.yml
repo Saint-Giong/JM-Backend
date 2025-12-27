@@ -5,6 +5,8 @@ services:
       context: ./JM-Eureka
     image: jm/eureka-server
     container_name: company-eureka-server
+    profiles:
+      - "all"
     ports:
       - "8070:8070"
     environment:
@@ -31,6 +33,8 @@ services:
         - GITHUB_KEY
     image: jm/gateway-server
     container_name: company-gateway-server
+    profiles:
+      - "all"
     ports:
       - "8072:8072"
     env_file:
@@ -59,6 +63,8 @@ services:
     image: confluentinc/cp-kafka:latest
     hostname: kafka
     container_name: company-kafka
+    profiles:
+      - "all"
     ports:
       - "9192:9092"
       - "9193:9093"
@@ -99,6 +105,8 @@ services:
     image: confluentinc/cp-schema-registry:latest
     hostname: jm-schema-registry
     container_name: jm-schema-registry
+    profiles:
+      - "all"
     ports:
       - "9191:9091"
     environment:
@@ -123,8 +131,9 @@ services:
       cache_from:
         - jm/company-auth-service:latest
     image: jm/company-auth-service
-#    command: ["java", "-jar", "/app/auth-service.jar"]
     container_name: company-auth-service
+    profiles:
+      - "all"
     ports:
       - "8180:8080"
     env_file:
@@ -168,8 +177,9 @@ services:
       cache_from:
         - jm/company-profile-service:latest
     image: jm/company-profile-service
-#    command: ["java", "-jar", "/app/profile-service.jar"]
     container_name: company-profile-service
+    profiles:
+      - "all"
     ports:
       - "8181:8081"
     env_file:
@@ -201,8 +211,11 @@ services:
   auth-db:
     image: postgres:latest
     container_name: company-auth-db
+    profiles:
+      - "all"
+      - "dbs"
     ports:
-      - "5533:5432"
+      - "5532:5432"
     environment:
       POSTGRES_DB: auth_db
       POSTGRES_USER: postgres
@@ -219,8 +232,11 @@ services:
   profile-db:
     image: postgres:latest
     container_name: company-profile-db
+    profiles:
+      - "all"
+      - "dbs"
     ports:
-      - "5534:5432"
+      - "5533:5432"
     environment:
       POSTGRES_DB: profile_db
       POSTGRES_USER: postgres
@@ -237,8 +253,11 @@ services:
   discovery-db:
     image: postgres:latest
     container_name: company-discovery-db
+    profiles:
+      - "all"
+      - "dbs"
     ports:
-      - "5535:5432"
+      - "5534:5432"
     environment:
       POSTGRES_DB: discovery_db
       POSTGRES_USER: postgres
@@ -252,11 +271,77 @@ services:
     networks:
       - job-manager
 
+  jobpost-db:
+    image: postgres:latest
+    container_name: company-jobpost-db
+    profiles:
+      - "all"
+      - "dbs"
+    ports:
+      - "5535:5432"
+    environment:
+      POSTGRES_DB: jobpost_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d jobpost_db || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
+
+  media-db:
+    image: postgres:latest
+    container_name: company-media-db
+    profiles:
+      - "all"
+      - "dbs"
+    ports:
+      - "5536:5432"
+    environment:
+      POSTGRES_DB: media_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d media_db || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
+
+  tag-db:
+    image: postgres:latest
+    container_name: company-tag-db
+    profiles:
+      - "all"
+      - "dbs"
+    ports:
+      - "5537:5432"
+    environment:
+      POSTGRES_DB: tag_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d tag_db || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
+
   subscription-db:
     image: postgres:latest
     container_name: company-subscription-db
+    profiles:
+      - "all"
+      - "dbs"
     ports:
-      - "5540:5432"
+      - "5538:5432"
     environment:
       POSTGRES_DB: subscription_db
       POSTGRES_USER: postgres
@@ -274,6 +359,9 @@ services:
   redis:
     image: redis:7-alpine
     container_name: company-auth-redis
+    profiles:
+      - "all"
+      - "dbs"
     ports:
       - "6479:6379"
     command: redis-server --appendonly yes
