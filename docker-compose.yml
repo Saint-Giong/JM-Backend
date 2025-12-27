@@ -7,6 +7,7 @@ services:
     container_name: company-eureka-server
     profiles:
       - "all"
+      - "infra"
     ports:
       - "8070:8070"
     environment:
@@ -35,6 +36,7 @@ services:
     container_name: company-gateway-server
     profiles:
       - "all"
+      - "infra"
     ports:
       - "8072:8072"
     env_file:
@@ -65,22 +67,20 @@ services:
     container_name: company-kafka
     profiles:
       - "all"
+      - "infra"
     ports:
       - "9192:9092"
       - "9193:9093"
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT"
-
       # 1. CONTROLLER: 9093 (Quản lý Cluster)
       # 2. PLAINTEXT: 29092 (Nội bộ Docker - Cho Schema Registry dùng)
       # 3. PLAINTEXT_HOST: 9092 (Bên ngoài - Cho Spring Boot dùng)
       KAFKA_LISTENERS: "PLAINTEXT://kafka:29092,CONTROLLER://kafka:9093,PLAINTEXT_HOST://0.0.0.0:9092"
-
       # - Nội bộ: kafka:29092
       # - Bên ngoài: localhost:9092
-      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:29092,PLAINTEXT_HOST://kafka:9092"
-
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9192"
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
@@ -90,14 +90,14 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
       KAFKA_LOG_DIRS: "/tmp/kraft-combined-logs"
       CLUSTER_ID: "Mk3OEYBSD34fcwNTJENDW233"
-    healthcheck: # Kiểm tra Kafka sống chưa trước khi bật Schema Registry
+    healthcheck:
       test: nc -z localhost 9092 || exit 1
       interval: 10s
       timeout: 5s
       retries: 5
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - kafka_data:/var/lib/kafka/data # Store Kafka logs on your local machine.
+      - kafka_data:/var/lib/kafka/data
     networks:
       - job-manager
 
@@ -107,6 +107,7 @@ services:
     container_name: jm-schema-registry
     profiles:
       - "all"
+      - "infra"
     ports:
       - "9191:9091"
     environment:
@@ -139,16 +140,23 @@ services:
     env_file:
       - ./JM-CompanyAuthService/CompanyAuthService/.auth.env
     environment:
+      SERVER_PORT: 8080
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
       SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/auth_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
       REDIS_HOST: redis
       REDIS_PASSWORD:
       OAUTH2_CLIENT_ID: ${OAUTH2_CLIENT_ID}
       OAUTH2_CLIENT_SECRET: ${OAUTH2_CLIENT_SECRET}
+      KAFKA_HOST_URL: kafka:9192
+      SCHEMA_REGISTRY_HOST_URL: http://schema-registry:9191
     depends_on:
       eureka-server:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      schema-registry:
         condition: service_healthy
       auth-db:
         condition: service_healthy
@@ -185,12 +193,19 @@ services:
     env_file:
       - ./JM-CompanyProfileService/CompanyProfileService/.profile.env
     environment:
+      SERVER_PORT: 8081
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
       SPRING_DATASOURCE_URL: jdbc:postgresql://profile-db:5432/profile_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
+      KAFKA_HOST_URL: kafka:9192
+      SCHEMA_REGISTRY_HOST_URL: http://schema-registry:9191
     depends_on:
       eureka-server:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      schema-registry:
         condition: service_healthy
       profile-db:
         condition: service_healthy
@@ -198,7 +213,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "curl --fail --silent http://localhost:8081/actuator/health/readiness | grep UP || exit 1",
+          "curl --fail --silent http://localhost:8181/actuator/health/readiness | grep UP || exit 1",
         ]
       interval: 10s
       timeout: 5s
@@ -213,6 +228,7 @@ services:
     container_name: company-auth-db
     profiles:
       - "all"
+      - "infra"
       - "dbs"
     ports:
       - "5532:5432"
@@ -221,7 +237,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d auth_db || exit 1"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d auth_db || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -234,6 +250,7 @@ services:
     container_name: company-profile-db
     profiles:
       - "all"
+      - "infra"
       - "dbs"
     ports:
       - "5533:5432"
@@ -242,7 +259,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d profile_db || exit 1"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d profile_db || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -255,6 +272,7 @@ services:
     container_name: company-discovery-db
     profiles:
       - "all"
+      - "infra"
       - "dbs"
     ports:
       - "5534:5432"
@@ -263,7 +281,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d discovery_db || exit 1"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d discovery_db || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -276,6 +294,7 @@ services:
     container_name: company-jobpost-db
     profiles:
       - "all"
+      - "infra"
       - "dbs"
     ports:
       - "5535:5432"
@@ -297,6 +316,7 @@ services:
     container_name: company-media-db
     profiles:
       - "all"
+      - "infra"
       - "dbs"
     ports:
       - "5536:5432"
@@ -318,6 +338,7 @@ services:
     container_name: company-tag-db
     profiles:
       - "all"
+      - "infra"
       - "dbs"
     ports:
       - "5537:5432"
@@ -339,6 +360,7 @@ services:
     container_name: company-subscription-db
     profiles:
       - "all"
+      - "infra"
       - "dbs"
     ports:
       - "5538:5432"
@@ -361,12 +383,13 @@ services:
     container_name: company-auth-redis
     profiles:
       - "all"
+      - "infra"
       - "dbs"
     ports:
       - "6479:6379"
     command: redis-server --appendonly yes
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
       timeout: 5s
       retries: 5
