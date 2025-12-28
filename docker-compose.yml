@@ -4,7 +4,7 @@ services:
     build:
       context: ./JM-Eureka
     image: jm/eureka-server
-    container_name: company-eureka-server
+    container_name: jm-infra-eureka
     profiles:
       - "all"
       - "infra"
@@ -33,7 +33,7 @@ services:
         - GITHUB_USERNAME
         - GITHUB_KEY
     image: jm/gateway-server
-    container_name: company-gateway-server
+    container_name: jm-infra-gateway
     profiles:
       - "all"
     ports:
@@ -45,8 +45,10 @@ services:
     depends_on:
       eureka-server:
         condition: service_healthy
-#      auth-service:
-#        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+      profile-service:
+        condition: service_healthy
     healthcheck:
       test:
         [
@@ -63,7 +65,7 @@ services:
   kafka:
     image: confluentinc/cp-kafka:latest
     hostname: kafka
-    container_name: company-kafka
+    container_name: jm-infra-kafka
     profiles:
       - "all"
       - "infra"
@@ -76,7 +78,7 @@ services:
       # 1. CONTROLLER: 9093 (Quản lý Cluster)
       # 2. PLAINTEXT: 29092 (Nội bộ Docker - Cho Schema Registry dùng)
       # 3. PLAINTEXT_HOST: 9092 (Bên ngoài - Cho Spring Boot dùng)
-      KAFKA_LISTENERS: "PLAINTEXT://kafka:29092,CONTROLLER://kafka:9093,PLAINTEXT_HOST://0.0.0.0:9092"
+      KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:29092,CONTROLLER://kafka:9093,PLAINTEXT_HOST://0.0.0.0:9092"
       # - Nội bộ: kafka:29092
       # - Bên ngoài: localhost:9092
       KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9192"
@@ -90,10 +92,11 @@ services:
       KAFKA_LOG_DIRS: "/tmp/kraft-combined-logs"
       CLUSTER_ID: "Mk3OEYBSD34fcwNTJENDW233"
     healthcheck:
-      test: nc -z localhost 9092 || exit 1
+      test: [ "CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092" ]
       interval: 10s
-      timeout: 5s
+      timeout: 10s
       retries: 5
+      start_period: 40s
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - kafka_data:/var/lib/kafka/data
@@ -103,7 +106,7 @@ services:
   schema-registry:
     image: confluentinc/cp-schema-registry:latest
     hostname: jm-schema-registry
-    container_name: jm-schema-registry
+    container_name: jm-infra-schema-registry
     profiles:
       - "all"
       - "infra"
@@ -116,7 +119,12 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_TOPIC_CONFIG_CLEANUP_POLICY: "compact"
     depends_on:
       - kafka
-    restart: on-failure
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://localhost:9091/subjects" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
     networks:
       - job-manager
 
@@ -131,7 +139,7 @@ services:
       cache_from:
         - jm/company-auth-service:latest
     image: jm/company-auth-service
-    container_name: company-auth-service
+    container_name: jm-service-auth
     profiles:
       - "all"
     ports:
@@ -146,10 +154,11 @@ services:
       SPRING_DATASOURCE_PASSWORD: postgres
       REDIS_HOST: redis
       REDIS_PASSWORD:
+      REDIS_PORT: 6379
       OAUTH2_CLIENT_ID: ${OAUTH2_CLIENT_ID}
       OAUTH2_CLIENT_SECRET: ${OAUTH2_CLIENT_SECRET}
-      KAFKA_HOST_URL: kafka:9192
-      SCHEMA_REGISTRY_HOST_URL: http://schema-registry:9191
+      KAFKA_HOST_URL: kafka:29092
+      SCHEMA_REGISTRY_HOST_URL: http://schema-registry:9091
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -165,9 +174,9 @@ services:
       test:
         [
           "CMD-SHELL",
-          "curl --fail --silent http://localhost:8180/actuator/health/readiness | grep UP || exit 1",
+          "curl --fail --silent http://localhost:8080/actuator/health/readiness | grep UP || exit 1",
         ]
-      interval: 10s
+      interval: 15s
       timeout: 5s
       retries: 10
       start_period: 10s
@@ -184,7 +193,7 @@ services:
       cache_from:
         - jm/company-profile-service:latest
     image: jm/company-profile-service
-    container_name: company-profile-service
+    container_name: jm-service-profile
     profiles:
       - "all"
     ports:
@@ -197,8 +206,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://profile-db:5432/profile_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
-      KAFKA_HOST_URL: kafka:9192
-      SCHEMA_REGISTRY_HOST_URL: http://schema-registry:9191
+      KAFKA_HOST_URL: kafka:29092
+      SCHEMA_REGISTRY_HOST_URL: http://schema-registry:9091
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -212,7 +221,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "curl --fail --silent http://localhost:8181/actuator/health/readiness | grep UP || exit 1",
+          "curl --fail --silent http://localhost:8081/actuator/health/readiness | grep UP || exit 1",
         ]
       interval: 10s
       timeout: 5s
@@ -224,7 +233,7 @@ services:
   # ============================= Databases =============================
   auth-db:
     image: postgres:latest
-    container_name: company-auth-db
+    container_name: jm-db-auth
     profiles:
       - "all"
       - "infra"
@@ -246,7 +255,7 @@ services:
 
   profile-db:
     image: postgres:latest
-    container_name: company-profile-db
+    container_name: jm-db-profile
     profiles:
       - "all"
       - "infra"
@@ -268,7 +277,7 @@ services:
 
   discovery-db:
     image: postgres:latest
-    container_name: company-discovery-db
+    container_name: jm-db-discovery
     profiles:
       - "all"
       - "infra"
@@ -290,7 +299,7 @@ services:
 
   jobpost-db:
     image: postgres:latest
-    container_name: company-jobpost-db
+    container_name: jm-db-jobpost
     profiles:
       - "all"
       - "infra"
@@ -312,7 +321,7 @@ services:
 
   media-db:
     image: postgres:latest
-    container_name: company-media-db
+    container_name: jm-db-media
     profiles:
       - "all"
       - "infra"
@@ -334,7 +343,7 @@ services:
 
   tag-db:
     image: postgres:latest
-    container_name: company-tag-db
+    container_name: jm-db-tag
     profiles:
       - "all"
       - "infra"
@@ -356,7 +365,7 @@ services:
 
   subscription-db:
     image: postgres:latest
-    container_name: company-subscription-db
+    container_name: jm-db-subscription
     profiles:
       - "all"
       - "infra"
@@ -379,7 +388,7 @@ services:
   # ============================= REDIS =============================
   redis:
     image: redis:7-alpine
-    container_name: company-auth-redis
+    container_name: jm-db-auth-redis
     profiles:
       - "all"
       - "infra"
