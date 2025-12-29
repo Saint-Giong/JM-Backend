@@ -38,7 +38,7 @@ services:
       - "all"
     ports:
       - "8072:8072"
-    env_file: ./.gateway.env
+    env_file: ./.env
     environment:
       EUREKA_INSTANCE_HOSTNAME: eureka-server
     depends_on:
@@ -50,6 +50,10 @@ services:
         condition: service_healthy
       discovery-service:
         condition: service_healthy
+      jobpost-service:
+        condition: service_healthy
+#      media-service:
+#        condition: service_healthy
       tag-service:
         condition: service_healthy
       subscription-service:
@@ -150,7 +154,8 @@ services:
     ports:
       - "8180:8080"
     env_file:
-      - ./JM-CompanyAuthService/CompanyAuthService/.auth.env
+#      - ./JM-CompanyAuthService/CompanyAuthService/.auth.env
+      - ./.env
     environment:
       SERVER_PORT: 8080
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
@@ -204,7 +209,8 @@ services:
     ports:
       - "8181:8081"
     env_file:
-      - ./JM-CompanyProfileService/CompanyProfileService/.profile.env
+#      - ./JM-CompanyProfileService/CompanyProfileService/.profile.env
+      - ./.env
     environment:
       SERVER_PORT: 8081
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
@@ -251,7 +257,8 @@ services:
     ports:
       - "8182:8082"
     env_file:
-      - ./JM-ApplicantDiscoveryService/ApplicantDiscoveryService/.discovery.env
+#      - ./JM-ApplicantDiscoveryService/ApplicantDiscoveryService/.discovery.env
+      - ./.env
     environment:
       SERVER_PORT: 8082
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
@@ -298,7 +305,8 @@ services:
     ports:
       - "8183:8083"
     env_file:
-      - ./JM-JobPostService/JobPostService/.jobpost.env
+#      - ./JM-JobPostService/JobPostService/.jobpost.env
+      - ./.env
     environment:
       SERVER_PORT: 8083
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
@@ -345,7 +353,8 @@ services:
     ports:
       - "8184:8084"
     env_file:
-      - ./JM-CompanyMediaService/CompanyMediaService/.media.env
+#      - ./JM-CompanyMediaService/CompanyMediaService/.media.env
+      - ./.env
     environment:
       SERVER_PORT: 8084
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
@@ -392,7 +401,8 @@ services:
     ports:
       - "8185:8085"
     env_file:
-      - ./JM-SkillTagService/SkillTagService/.tag.env
+#      - ./JM-SkillTagService/SkillTagService/.tag.env
+      - ./.env
     environment:
       SERVER_PORT: 8085
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
@@ -439,7 +449,8 @@ services:
     ports:
       - "8186:8086"
     env_file:
-      - ./JM-CompanySubscriptionService/CompanySubscriptionService/.subscription.env
+#      - ./JM-CompanySubscriptionService/CompanySubscriptionService/.subscription.env
+      - ./.env
     environment:
       SERVER_PORT: 8086
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
@@ -618,6 +629,28 @@ services:
       POSTGRES_PASSWORD: postgres
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres -d subscription_db || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
+
+  payment-db:
+    image: postgres:latest
+    container_name: jm-db-payment
+    profiles:
+      - "all"
+      - "infra"
+      - "dbs"
+    ports:
+      - "5539:5432"
+    environment:
+      POSTGRES_DB: transaction_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d transaction_db || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 10
