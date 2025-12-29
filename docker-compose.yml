@@ -38,8 +38,7 @@ services:
       - "all"
     ports:
       - "8072:8072"
-    env_file:
-      - ./.env
+    env_file: ./.gateway.env
     environment:
       EUREKA_INSTANCE_HOSTNAME: eureka-server
     depends_on:
@@ -48,6 +47,12 @@ services:
       auth-service:
         condition: service_healthy
       profile-service:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+      tag-service:
+        condition: service_healthy
+      subscription-service:
         condition: service_healthy
     healthcheck:
       test:
@@ -222,6 +227,241 @@ services:
         [
           "CMD-SHELL",
           "curl --fail --silent http://localhost:8081/actuator/health/readiness | grep UP || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
+
+  discovery-service:
+    build:
+      context: .
+      dockerfile: JM-ApplicantDiscoveryService/Dockerfile
+      secrets:
+        - GITHUB_USERNAME
+        - GITHUB_KEY
+      cache_from:
+        - jm/company-discovery-service:latest
+    image: jm/company-discovery-service
+    container_name: jm-service-discovery
+    profiles:
+      - "all"
+    ports:
+      - "8182:8082"
+    env_file:
+      - ./JM-ApplicantDiscoveryService/ApplicantDiscoveryService/.discovery.env
+    environment:
+      SERVER_PORT: 8082
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
+      SPRING_DATASOURCE_URL: jdbc:postgresql://discovery-db:5432/discovery_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      KAFKA_HOST_URL: kafka:29092
+      SCHEMA_REGISTRY_HOST_URL: http://schema-registry:9091
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
+      discovery-db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl --fail --silent http://localhost:8082/actuator/health/readiness | grep UP || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
+
+  jobpost-service:
+    build:
+      context: .
+      dockerfile: JM-JobPostService/Dockerfile
+      secrets:
+        - GITHUB_USERNAME
+        - GITHUB_KEY
+      cache_from:
+        - jm/company-jobpost-service:latest
+    image: jm/company-jobpost-service
+    container_name: jm-service-jobpost
+    profiles:
+      - "all"
+    ports:
+      - "8183:8083"
+    env_file:
+      - ./JM-JobPostService/JobPostService/.jobpost.env
+    environment:
+      SERVER_PORT: 8083
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
+      SPRING_DATASOURCE_URL: jdbc:postgresql://jobpost-db:5432/jobpost_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      KAFKA_HOST_URL: kafka:29092
+      SCHEMA_REGISTRY_HOST_URL: http://schema-registry:9091
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
+      jobpost-db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl --fail --silent http://localhost:8083/actuator/health/readiness | grep UP || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
+
+  media-service:
+    build:
+      context: .
+      dockerfile: JM-CompanyMediaService/Dockerfile
+      secrets:
+        - GITHUB_USERNAME
+        - GITHUB_KEY
+      cache_from:
+        - jm/company-media-service:latest
+    image: jm/company-media-service
+    container_name: jm-service-media
+    profiles:
+      - "all"
+    ports:
+      - "8184:8084"
+    env_file:
+      - ./JM-CompanyMediaService/CompanyMediaService/.media.env
+    environment:
+      SERVER_PORT: 8084
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
+      SPRING_DATASOURCE_URL: jdbc:postgresql://media-db:5432/media_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      KAFKA_HOST_URL: kafka:29092
+      SCHEMA_REGISTRY_HOST_URL: http://schema-registry:9091
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
+      media-db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl --fail --silent http://localhost:8084/actuator/health/readiness | grep UP || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
+
+  tag-service:
+    build:
+      context: .
+      dockerfile: JM-SkillTagService/Dockerfile
+      secrets:
+        - GITHUB_USERNAME
+        - GITHUB_KEY
+      cache_from:
+        - jm/company-tag-service:latest
+    image: jm/company-tag-service
+    container_name: jm-service-tag
+    profiles:
+      - "all"
+    ports:
+      - "8185:8085"
+    env_file:
+      - ./JM-SkillTagService/SkillTagService/.tag.env
+    environment:
+      SERVER_PORT: 8085
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
+      SPRING_DATASOURCE_URL: jdbc:postgresql://tag-db:5432/tag_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      KAFKA_HOST_URL: kafka:29092
+      SCHEMA_REGISTRY_HOST_URL: http://schema-registry:9091
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
+      tag-db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl --fail --silent http://localhost:8085/actuator/health/readiness | grep UP || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
+
+  subscription-service:
+    build:
+      context: .
+      dockerfile: JM-CompanySubscriptionService/Dockerfile
+      secrets:
+        - GITHUB_USERNAME
+        - GITHUB_KEY
+      cache_from:
+        - jm/company-subscription-service:latest
+    image: jm/company-subscription-service
+    container_name: jm-service-subscription
+    profiles:
+      - "all"
+    ports:
+      - "8186:8086"
+    env_file:
+      - ./JM-CompanySubscriptionService/CompanySubscriptionService/.subscription.env
+    environment:
+      SERVER_PORT: 8086
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
+      SPRING_DATASOURCE_URL: jdbc:postgresql://subscription-db:5432/subscription_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      KAFKA_HOST_URL: kafka:29092
+      SCHEMA_REGISTRY_HOST_URL: http://schema-registry:9091
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
+      subscription-db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl --fail --silent http://localhost:8086/actuator/health/readiness | grep UP || exit 1",
         ]
       interval: 10s
       timeout: 5s
