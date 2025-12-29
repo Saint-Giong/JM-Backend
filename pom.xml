@@ -25,7 +25,7 @@
         <module>JM-Eureka</module>
         <module>JM-Gateway</module>
         <module>JM-JobPostService</module>
-        <module>JM-SkillTag</module>
+        <module>JM-SkillTagService</module>
         <module>SG-SharedDtoPackage</module>
     </modules>
 
