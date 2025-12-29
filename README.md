@@ -13,12 +13,7 @@ git clone https://github.com/Saint-Giong/JM-Backend.git
 ```
 
 ## 2\. Repository Fetching
-- Fetch latest changes to `submodules`
-```xml aiignore
-git submodule update --remote
-```
-
-- If you have `nested submodules`, include the `--recursive` flag
+- With `nested submodules`, include the `--recursive` flag
 ```xml
 git submodule update --remote --recursive
 ```
