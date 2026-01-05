@@ -1,0 +1,219 @@
+services:
+  # ============================= Databases =============================
+  auth-db:
+    image: postgres:latest
+    container_name: jm-db-auth
+    profiles:
+      - "all"
+      - "infra"
+      - "dbs"
+    ports:
+      - "5532:5432"
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d auth_db || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
+
+  profile-db:
+    image: postgres:latest
+    container_name: jm-db-profile
+    profiles:
+      - "all"
+      - "infra"
+      - "dbs"
+    ports:
+      - "5533:5432"
+    environment:
+      POSTGRES_DB: profile_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d profile_db || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
+
+  discovery-db:
+    image: postgres:latest
+    container_name: jm-db-discovery
+    profiles:
+      - "all"
+      - "infra"
+      - "dbs"
+    ports:
+      - "5534:5432"
+    environment:
+      POSTGRES_DB: discovery_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d discovery_db || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
+
+  jobpost-db:
+    image: postgres:latest
+    container_name: jm-db-jobpost
+    profiles:
+      - "all"
+      - "infra"
+      - "dbs"
+    ports:
+      - "5535:5432"
+    environment:
+      POSTGRES_DB: jobpost_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d jobpost_db || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
+
+  media-db:
+    image: postgres:latest
+    container_name: jm-db-media
+    profiles:
+      - "all"
+      - "infra"
+      - "dbs"
+    ports:
+      - "5536:5432"
+    environment:
+      POSTGRES_DB: media_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d media_db || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
+
+  tag-db:
+    image: postgres:latest
+    container_name: jm-db-tag
+    profiles:
+      - "all"
+      - "infra"
+      - "dbs"
+    ports:
+      - "5537:5432"
+    environment:
+      POSTGRES_DB: tag_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d tag_db || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
+
+  subscription-db:
+    image: postgres:latest
+    container_name: jm-db-subscription
+    profiles:
+      - "all"
+      - "infra"
+      - "dbs"
+    ports:
+      - "5538:5432"
+    environment:
+      POSTGRES_DB: subscription_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d subscription_db || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
+
+#  transaction-db:
+#    image: postgres:latest
+#    container_name: jm-db-transaction
+#    profiles:
+#      - "all"
+#      - "infra"
+#      - "dbs"
+#    ports:
+#      - "5539:5432"
+#    environment:
+#      POSTGRES_DB: transaction_db
+#      POSTGRES_USER: postgres
+#      POSTGRES_PASSWORD: postgres
+#    healthcheck:
+#      test: [ "CMD-SHELL", "pg_isready -U postgres -d transaction_db || exit 1" ]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 10
+#      start_period: 10s
+#    networks:
+#      - job-manager
+
+  notification-db:
+    image: postgres:latest
+    container_name: jm-db-notification
+    profiles:
+      - "all"
+      - "infra"
+      - "dbs"
+    ports:
+      - "5540:5432"
+    environment:
+      POSTGRES_DB: notification_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d notification_db || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
+
+  # ============================= REDIS =============================
+  redis:
+    image: redis:7-alpine
+    container_name: jm-db-auth-redis
+    profiles:
+      - "all"
+      - "infra"
+      - "dbs"
+    ports:
+      - "6479:6379"
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - job-manager

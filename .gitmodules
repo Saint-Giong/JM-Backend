@@ -28,3 +28,9 @@
 [submodule "JM-SkillTagService"]
 	path = JM-SkillTagService
 	url = https://github.com/Saint-Giong/JM-SkillTagService.git
+[submodule "JM-NotificationService"]
+	path = JM-NotificationService
+	url = https://github.com/Saint-Giong/JM-NotificationService.git
+[submodule "JM-CompanyPaymentService"]
+	path = JM-CompanyPaymentService
+	url = https://github.com/Saint-Giong/JM-CompanyPaymentService.git

@@ -1,5 +1,6 @@
 include:
-  - docker-jm.yml
+  - docker-jm-dbs.yml
+  - docker-jm-services.yml
 
 services:
   # ============================= Infrastructure =============================
@@ -28,7 +29,7 @@ services:
     networks:
       - job-manager
 
-  gateway:
+  gateway-server:
     build:
       context: .
       dockerfile: JM-Gateway/Dockerfile
@@ -47,19 +48,21 @@ services:
     depends_on:
       eureka-server:
         condition: service_healthy
-      auth-service:
-        condition: service_healthy
-      profile-service:
-        condition: service_healthy
-      discovery-service:
-        condition: service_healthy
-      jobpost-service:
-        condition: service_healthy
+#      auth-service:
+#        condition: service_healthy
+#      profile-service:
+#        condition: service_healthy
+#      discovery-service:
+#        condition: service_healthy
+#      jobpost-service:
+#        condition: service_healthy
 #      media-service:
 #        condition: service_healthy
-      tag-service:
-        condition: service_healthy
-      subscription-service:
+#      tag-service:
+#        condition: service_healthy
+#      subscription-service:
+#        condition: service_healthy
+      notification-service:
         condition: service_healthy
     healthcheck:
       test:
@@ -114,6 +117,24 @@ services:
       - kafka_data:/var/lib/kafka/data
     networks:
       - job-manager
+#
+  kafka-ui:
+    image: provectuslabs/kafka-ui
+    container_name: jm-infra-kafka-ui
+    profiles:
+      - "all"
+      - "infra"
+    ports:
+      - "8888:8080"
+    restart: always
+    environment:
+      KAFKA_CLUSTERS_0_NAME: "kraft-cluster"
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - job-manager
 
   schema-registry:
     image: confluentinc/cp-schema-registry:latest
@@ -130,7 +151,8 @@ services:
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:9091
       SCHEMA_REGISTRY_KAFKASTORE_TOPIC_CONFIG_CLEANUP_POLICY: "compact"
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
     healthcheck:
       test: [ "CMD", "curl", "--fail", "http://localhost:9091/subjects" ]
       interval: 10s

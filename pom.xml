@@ -20,11 +20,13 @@
         <module>JM-ApplicantDiscoveryService</module>
         <module>JM-CompanyAuthService</module>
         <module>JM-CompanyMediaService</module>
+        <module>JM-CompanyPaymentService</module>
         <module>JM-CompanyProfileService</module>
         <module>JM-CompanySubscriptionService</module>
         <module>JM-Eureka</module>
         <module>JM-Gateway</module>
         <module>JM-JobPostService</module>
+        <module>JM-NotificationService</module>
         <module>JM-SkillTagService</module>
         <module>SG-SharedDtoPackage</module>
     </modules>

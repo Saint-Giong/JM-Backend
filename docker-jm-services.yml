@@ -343,199 +343,112 @@ services:
     networks:
       - job-manager
 
-  # ============================= Databases =============================
-  auth-db:
-    image: postgres:latest
-    container_name: jm-db-auth
+#  payment-service:
+#    build:
+#      context: .
+#      dockerfile: JM-CompanyPaymentService/Dockerfile
+#      secrets:
+#        - GITHUB_USERNAME
+#        - GITHUB_KEY
+#      cache_from:
+#        - jm/company-payment-service:latest
+#    image: jm/company-payment-service
+#    container_name: jm-service-payment
+#    profiles:
+#      - "all"
+#    ports:
+#      - "8187:8087"
+#    env_file:
+#      #      - ./JM-CompanyAuthService/CompanyAuthService/.auth.env
+#      - ./.env
+#    environment:
+#      SERVER_PORT: 8087
+#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://transaction-db:5432/transaction_db
+#      SPRING_DATASOURCE_USERNAME: postgres
+#      SPRING_DATASOURCE_PASSWORD: postgres
+#      KAFKA_HOST_URL: kafka:29092
+#      SCHEMA_REGISTRY_HOST_URL: http://schema-registry:9091
+#
+#    depends_on:
+#      eureka-server:
+#        condition: service_healthy
+#      kafka:
+#        condition: service_healthy
+#      schema-registry:
+#        condition: service_healthy
+#      transaction-db:
+#        condition: service_healthy
+#    healthcheck:
+#      test:
+#        [
+#          "CMD-SHELL",
+#          "curl --fail --silent http://localhost:8087/actuator/health/readiness | grep UP || exit 1",
+#        ]
+#      interval: 15s
+#      timeout: 5s
+#      retries: 10
+#      start_period: 10s
+#    networks:
+#      - job-manager
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: JM-NotificationService/Dockerfile
+      secrets:
+        - GITHUB_USERNAME
+        - GITHUB_KEY
+      cache_from:
+        - jm/company-notification-service:latest
+    image: jm/company-notification-service
+    container_name: jm-service-notification
     profiles:
       - "all"
-      - "infra"
-      - "dbs"
     ports:
-      - "5532:5432"
+      - "8188:8088"
+    env_file:
+      - ./.env
     environment:
-      POSTGRES_DB: auth_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      SERVER_PORT: 8088
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
+      SPRING_DATASOURCE_URL: jdbc:postgresql://notification-db:5432/notification_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      # === Kafka and Schema Registry ===
+      KAFKA_HOST_URL: kafka:29092
+      SCHEMA_REGISTRY_HOST_URL: http://schema-registry:9091
+      # =============== SECURITY ===============
+      # Key Pair
+      PUBLIC_KEY_B64: ${PUBLIC_KEY_B64}
+      PRIVATE_KEY_B64: ${PRIVATE_KEY_B64}
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PASSWORD:
+      REDIS_PORT: 6379
+      # Jwe Config
+      JWE_ISSUER: ${JWE_ISSUER}
+      JWE_TEMP_TOKEN_TTL: ${JWE_TEMP_TOKEN_TTL}
+      JWE_ACCESS_TOKEN_TTL: ${JWE_ACCESS_TOKEN_TTL}
+      JWE_REFRESH_TOKEN_TTL: ${JWE_REFRESH_TOKEN_TTL}
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
+      notification-db:
+        condition: service_healthy
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d auth_db || exit 1" ]
-      interval: 10s
+      test:
+        [
+          "CMD-SHELL",
+          "curl --fail --silent http://localhost:8088/actuator/health/readiness | grep UP || exit 1",
+        ]
+      interval: 15s
       timeout: 5s
       retries: 10
-      start_period: 10s
-    networks:
-      - job-manager
-
-  profile-db:
-    image: postgres:latest
-    container_name: jm-db-profile
-    profiles:
-      - "all"
-      - "infra"
-      - "dbs"
-    ports:
-      - "5533:5432"
-    environment:
-      POSTGRES_DB: profile_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d profile_db || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
-    networks:
-      - job-manager
-
-  discovery-db:
-    image: postgres:latest
-    container_name: jm-db-discovery
-    profiles:
-      - "all"
-      - "infra"
-      - "dbs"
-    ports:
-      - "5534:5432"
-    environment:
-      POSTGRES_DB: discovery_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d discovery_db || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
-    networks:
-      - job-manager
-
-  jobpost-db:
-    image: postgres:latest
-    container_name: jm-db-jobpost
-    profiles:
-      - "all"
-      - "infra"
-      - "dbs"
-    ports:
-      - "5535:5432"
-    environment:
-      POSTGRES_DB: jobpost_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d jobpost_db || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
-    networks:
-      - job-manager
-
-  media-db:
-    image: postgres:latest
-    container_name: jm-db-media
-    profiles:
-      - "all"
-      - "infra"
-      - "dbs"
-    ports:
-      - "5536:5432"
-    environment:
-      POSTGRES_DB: media_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d media_db || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
-    networks:
-      - job-manager
-
-  tag-db:
-    image: postgres:latest
-    container_name: jm-db-tag
-    profiles:
-      - "all"
-      - "infra"
-      - "dbs"
-    ports:
-      - "5537:5432"
-    environment:
-      POSTGRES_DB: tag_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d tag_db || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
-    networks:
-      - job-manager
-
-  subscription-db:
-    image: postgres:latest
-    container_name: jm-db-subscription
-    profiles:
-      - "all"
-      - "infra"
-      - "dbs"
-    ports:
-      - "5538:5432"
-    environment:
-      POSTGRES_DB: subscription_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d subscription_db || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
-    networks:
-      - job-manager
-
-  payment-db:
-    image: postgres:latest
-    container_name: jm-db-payment
-    profiles:
-      - "all"
-      - "infra"
-      - "dbs"
-    ports:
-      - "5539:5432"
-    environment:
-      POSTGRES_DB: transaction_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d transaction_db || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
-    networks:
-      - job-manager
-
-  # ============================= REDIS =============================
-  redis:
-    image: redis:7-alpine
-    container_name: jm-db-auth-redis
-    profiles:
-      - "all"
-      - "infra"
-      - "dbs"
-    ports:
-      - "6479:6379"
-    command: redis-server --appendonly yes
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
       start_period: 10s
     networks:
       - job-manager
