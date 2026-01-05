@@ -343,54 +343,71 @@ services:
     networks:
       - job-manager
 
-#  payment-service:
-#    build:
-#      context: .
-#      dockerfile: JM-CompanyPaymentService/Dockerfile
-#      secrets:
-#        - GITHUB_USERNAME
-#        - GITHUB_KEY
-#      cache_from:
-#        - jm/company-payment-service:latest
-#    image: jm/company-payment-service
-#    container_name: jm-service-payment
-#    profiles:
-#      - "all"
-#    ports:
-#      - "8187:8087"
-#    env_file:
-#      #      - ./JM-CompanyAuthService/CompanyAuthService/.auth.env
-#      - ./.env
-#    environment:
-#      SERVER_PORT: 8087
-#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
-#      SPRING_DATASOURCE_URL: jdbc:postgresql://transaction-db:5432/transaction_db
-#      SPRING_DATASOURCE_USERNAME: postgres
-#      SPRING_DATASOURCE_PASSWORD: postgres
-#      KAFKA_HOST_URL: kafka:29092
-#      SCHEMA_REGISTRY_HOST_URL: http://schema-registry:9091
-#
-#    depends_on:
-#      eureka-server:
-#        condition: service_healthy
-#      kafka:
-#        condition: service_healthy
-#      schema-registry:
-#        condition: service_healthy
-#      transaction-db:
-#        condition: service_healthy
-#    healthcheck:
-#      test:
-#        [
-#          "CMD-SHELL",
-#          "curl --fail --silent http://localhost:8087/actuator/health/readiness | grep UP || exit 1",
-#        ]
-#      interval: 15s
-#      timeout: 5s
-#      retries: 10
-#      start_period: 10s
-#    networks:
-#      - job-manager
+  payment-service:
+    build:
+      context: .
+      dockerfile: JM-CompanyPaymentService/Dockerfile
+      secrets:
+        - GITHUB_USERNAME
+        - GITHUB_KEY
+      cache_from:
+        - jm/company-payment-service:latest
+    image: jm/company-payment-service
+    container_name: jm-service-payment
+    profiles:
+      - "all"
+    ports:
+      - "8187:8187"
+    env_file:
+      - ./.env
+    environment:
+      SERVER_PORT: 8187
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
+      SPRING_DATASOURCE_URL: jdbc:postgresql://transaction-db:5432/transaction_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      # =============== STRIPE ===============
+      STRIPE_API_KEY: ${STRIPE_API_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      STRIPE_CHECKOUT_SUCCESS_URL: http://localhost:3000/payment/success
+      STRIPE_CHECKOUT_CANCEL_URL: http://localhost:3000/payment/cancel
+      # =============== KAFKA & SCHEMA REGISTRY ===============
+      KAFKA_HOST_URL: kafka:29092
+      SCHEMA_REGISTRY_HOST_URL: http://schema-registry:9091
+      # =============== SECURITY ===============
+      # Key Pair
+      PUBLIC_KEY_B64: ${PUBLIC_KEY_B64}
+      PRIVATE_KEY_B64: ${PRIVATE_KEY_B64}
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PASSWORD:
+      REDIS_PORT: 6379
+      # Jwe Config
+      JWE_ISSUER: ${JWE_ISSUER}
+      JWE_TEMP_TOKEN_TTL: ${JWE_TEMP_TOKEN_TTL}
+      JWE_ACCESS_TOKEN_TTL: ${JWE_ACCESS_TOKEN_TTL}
+      JWE_REFRESH_TOKEN_TTL: ${JWE_REFRESH_TOKEN_TTL}
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
+      transaction-db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl --fail --silent http://localhost:8187/actuator/health/readiness | grep UP || exit 1",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
 
   notification-service:
     build:
@@ -406,11 +423,11 @@ services:
     profiles:
       - "all"
     ports:
-      - "8188:8088"
+      - "8188:8188"
     env_file:
       - ./.env
     environment:
-      SERVER_PORT: 8088
+      SERVER_PORT: 8188
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
       SPRING_DATASOURCE_URL: jdbc:postgresql://notification-db:5432/notification_db
       SPRING_DATASOURCE_USERNAME: postgres
@@ -444,7 +461,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "curl --fail --silent http://localhost:8088/actuator/health/readiness | grep UP || exit 1",
+          "curl --fail --silent http://localhost:8188/actuator/health/readiness | grep UP || exit 1",
         ]
       interval: 15s
       timeout: 5s
