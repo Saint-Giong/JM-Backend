@@ -48,10 +48,10 @@ services:
     depends_on:
       eureka-server:
         condition: service_healthy
-#      auth-service:
-#        condition: service_healthy
-#      profile-service:
-#        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+      profile-service:
+        condition: service_healthy
 #      discovery-service:
 #        condition: service_healthy
 #      jobpost-service:

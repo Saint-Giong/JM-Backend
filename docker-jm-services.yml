@@ -14,23 +14,35 @@ services:
     profiles:
       - "all"
     ports:
-      - "8180:8080"
+      - "8180:8180"
     env_file:
-#      - ./JM-CompanyAuthService/CompanyAuthService/.auth.env
       - ./.env
     environment:
-      SERVER_PORT: 8080
+      SERVER_PORT: 8180
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
       SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/auth_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
+      # =============== OAUTH GOOGLE ===============
+      OAUTH2_CLIENT_ID: ${OAUTH2_CLIENT_ID}
+      OAUTH2_CLIENT_SECRET: ${OAUTH2_CLIENT_SECRET}
+      OAUTH2_REDIRECT_URI: ${OAUTH2_REDIRECT_URI}
+      # =============== KAFKA & SCHEMA REGISTRY ===============
+      KAFKA_HOST_URL: kafka:29092
+      SCHEMA_REGISTRY_HOST_URL: http://schema-registry:9091
+      # =============== SECURITY ===============
+      # Key Pair
+      PUBLIC_KEY_B64: ${PUBLIC_KEY_B64}
+      PRIVATE_KEY_B64: ${PRIVATE_KEY_B64}
+      # Redis
       REDIS_HOST: redis
       REDIS_PASSWORD:
       REDIS_PORT: 6379
-      OAUTH2_CLIENT_ID: ${OAUTH2_CLIENT_ID}
-      OAUTH2_CLIENT_SECRET: ${OAUTH2_CLIENT_SECRET}
-      KAFKA_HOST_URL: kafka:29092
-      SCHEMA_REGISTRY_HOST_URL: http://schema-registry:9091
+      # Jwe Config
+      JWE_ISSUER: ${JWE_ISSUER}
+      JWE_TEMP_TOKEN_TTL: ${JWE_TEMP_TOKEN_TTL}
+      JWE_ACCESS_TOKEN_TTL: ${JWE_ACCESS_TOKEN_TTL}
+      JWE_REFRESH_TOKEN_TTL: ${JWE_REFRESH_TOKEN_TTL}
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -46,7 +58,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "curl --fail --silent http://localhost:8080/actuator/health/readiness | grep UP || exit 1",
+          "curl --fail --silent http://localhost:8180/actuator/health/readiness | grep UP || exit 1",
         ]
       interval: 15s
       timeout: 5s
@@ -69,18 +81,32 @@ services:
     profiles:
       - "all"
     ports:
-      - "8181:8081"
+      - "8181:8181"
     env_file:
 #      - ./JM-CompanyProfileService/CompanyProfileService/.profile.env
       - ./.env
     environment:
-      SERVER_PORT: 8081
+      SERVER_PORT: 8181
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
       SPRING_DATASOURCE_URL: jdbc:postgresql://profile-db:5432/profile_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
+      # =============== KAFKA & SCHEMA REGISTRY ===============
       KAFKA_HOST_URL: kafka:29092
       SCHEMA_REGISTRY_HOST_URL: http://schema-registry:9091
+      # =============== SECURITY ===============
+      # Key Pair
+      PUBLIC_KEY_B64: ${PUBLIC_KEY_B64}
+      PRIVATE_KEY_B64: ${PRIVATE_KEY_B64}
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PASSWORD:
+      REDIS_PORT: 6379
+      # Jwe Config
+      JWE_ISSUER: ${JWE_ISSUER}
+      JWE_TEMP_TOKEN_TTL: ${JWE_TEMP_TOKEN_TTL}
+      JWE_ACCESS_TOKEN_TTL: ${JWE_ACCESS_TOKEN_TTL}
+      JWE_REFRESH_TOKEN_TTL: ${JWE_REFRESH_TOKEN_TTL}
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -94,7 +120,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "curl --fail --silent http://localhost:8081/actuator/health/readiness | grep UP || exit 1",
+          "curl --fail --silent http://localhost:8181/actuator/health/readiness | grep UP || exit 1",
         ]
       interval: 10s
       timeout: 5s
