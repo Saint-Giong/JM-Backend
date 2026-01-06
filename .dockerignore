@@ -43,3 +43,7 @@ docs/
 tmp/
 temp/
 *.tmp
+
+# Maven backup files
+*.versionsBackup
+**/*.versionsBackup
