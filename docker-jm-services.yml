@@ -67,66 +67,66 @@ services:
     networks:
       - job-manager
 
-#  profile-service:
-#    build:
-#      context: .
-#      dockerfile: JM-CompanyProfileService/Dockerfile
-#      secrets:
-#        - GITHUB_USERNAME
-#        - GITHUB_KEY
-#      cache_from:
-#        - jm/company-profile-service:latest
-#    image: jm/company-profile-service
-#    container_name: jm-service-profile
-#    profiles:
-#      - "all"
-#    ports:
-#      - "8181:8181"
-#    env_file:
-#      - ./.env
-#    environment:
-#      SERVER_PORT: 8181
-#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
-#      SPRING_DATASOURCE_URL: jdbc:postgresql://profile-db:5432/profile_db
-#      SPRING_DATASOURCE_USERNAME: postgres
-#      SPRING_DATASOURCE_PASSWORD: postgres
-#      # =============== KAFKA & SCHEMA REGISTRY ===============
-#      KAFKA_HOST_URL: kafka:29092
-#      SCHEMA_REGISTRY_HOST_URL: http://schema-registry:9091
-#      # =============== SECURITY ===============
-#      # Key Pair
-#      PUBLIC_KEY_B64: ${PUBLIC_KEY_B64}
-#      PRIVATE_KEY_B64: ${PRIVATE_KEY_B64}
-#      # Redis
-#      REDIS_HOST: redis
-#      REDIS_PASSWORD:
-#      REDIS_PORT: 6379
-#      # Jwe Config
-#      JWE_ISSUER: ${JWE_ISSUER}
-#      JWE_TEMP_TOKEN_TTL: ${JWE_TEMP_TOKEN_TTL}
-#      JWE_ACCESS_TOKEN_TTL: ${JWE_ACCESS_TOKEN_TTL}
-#      JWE_REFRESH_TOKEN_TTL: ${JWE_REFRESH_TOKEN_TTL}
-#    depends_on:
-#      eureka-server:
-#        condition: service_healthy
-#      kafka:
-#        condition: service_healthy
-#      schema-registry:
-#        condition: service_healthy
-#      profile-db:
-#        condition: service_healthy
-#    healthcheck:
-#      test:
-#        [
-#          "CMD-SHELL",
-#          "curl --fail --silent http://localhost:8181/actuator/health/readiness | grep UP || exit 1",
-#        ]
-#      interval: 10s
-#      timeout: 5s
-#      retries: 10
-#      start_period: 10s
-#    networks:
-#      - job-manager
+  profile-service:
+    build:
+      context: .
+      dockerfile: JM-CompanyProfileService/Dockerfile
+      secrets:
+        - GITHUB_USERNAME
+        - GITHUB_KEY
+      cache_from:
+        - jm/company-profile-service:latest
+    image: jm/company-profile-service
+    container_name: jm-service-profile
+    profiles:
+      - "all"
+    ports:
+      - "8181:8181"
+    env_file:
+      - ./.env
+    environment:
+      SERVER_PORT: 8181
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
+      SPRING_DATASOURCE_URL: jdbc:postgresql://profile-db:5432/profile_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      # =============== KAFKA & SCHEMA REGISTRY ===============
+      KAFKA_HOST_URL: kafka:29092
+      SCHEMA_REGISTRY_HOST_URL: http://schema-registry:9091
+      # =============== SECURITY ===============
+      # Key Pair
+      PUBLIC_KEY_B64: ${PUBLIC_KEY_B64}
+      PRIVATE_KEY_B64: ${PRIVATE_KEY_B64}
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PASSWORD:
+      REDIS_PORT: 6379
+      # Jwe Config
+      JWE_ISSUER: ${JWE_ISSUER}
+      JWE_TEMP_TOKEN_TTL: ${JWE_TEMP_TOKEN_TTL}
+      JWE_ACCESS_TOKEN_TTL: ${JWE_ACCESS_TOKEN_TTL}
+      JWE_REFRESH_TOKEN_TTL: ${JWE_REFRESH_TOKEN_TTL}
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
+      profile-db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl --fail --silent http://localhost:8181/actuator/health/readiness | grep UP || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
 
   discovery-service:
     build:
@@ -258,71 +258,71 @@ services:
     networks:
       - job-manager
 
-#  media-service:
-#    build:
-#      context: .
-#      dockerfile: JM-CompanyMediaService/Dockerfile
-#      secrets:
-#        - GITHUB_USERNAME
-#        - GITHUB_KEY
-#      cache_from:
-#        - jm/company-media-service:latest
-#    image: jm/company-media-service
-#    container_name: jm-service-media
-#    profiles:
-#      - "all"
-#    ports:
-#      - "8184:8184"
-#    env_file:
-#      - ./.env
-#    environment:
-#      SERVER_PORT: 8184
-#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
-#      SPRING_DATASOURCE_URL: jdbc:postgresql://media-db:5432/media_db
-#      SPRING_DATASOURCE_USERNAME: postgres
-#      SPRING_DATASOURCE_PASSWORD: postgres
-#      # =============== MEDIA GCS ===============
-#      COMPANYMEDIA_GCS_BUCKET: ${COMPANYMEDIA_GCS_BUCKET}
-#      COMPANYMEDIA_GCS_UPLOAD_PREFIX: ${COMPANYMEDIA_GCS_UPLOAD_PREFIX}
-#      COMPANYMEDIA_GCS_SIGNED_URL_TTL_MINUTES: ${COMPANYMEDIA_GCS_SIGNED_URL_TTL_MINUTES}
-#      GOOGLE_APPLICATION_CREDENTIALS: ${GOOGLE_APPLICATION_CREDENTIALS}
-#      # =============== KAFKA & SCHEMA REGISTRY ===============
-#      KAFKA_HOST_URL: kafka:29092
-#      SCHEMA_REGISTRY_HOST_URL: http://schema-registry:9091
-#      # =============== SECURITY ===============
-#      # Key Pair
-#      PUBLIC_KEY_B64: ${PUBLIC_KEY_B64}
-#      PRIVATE_KEY_B64: ${PRIVATE_KEY_B64}
-#      # Redis
-#      REDIS_HOST: redis
-#      REDIS_PASSWORD:
-#      REDIS_PORT: 6379
-#      # Jwe Config
-#      JWE_ISSUER: ${JWE_ISSUER}
-#      JWE_TEMP_TOKEN_TTL: ${JWE_TEMP_TOKEN_TTL}
-#      JWE_ACCESS_TOKEN_TTL: ${JWE_ACCESS_TOKEN_TTL}
-#      JWE_REFRESH_TOKEN_TTL: ${JWE_REFRESH_TOKEN_TTL}
-#    depends_on:
-#      eureka-server:
-#        condition: service_healthy
-#      kafka:
-#        condition: service_healthy
-#      schema-registry:
-#        condition: service_healthy
-#      media-db:
-#        condition: service_healthy
-#    healthcheck:
-#      test:
-#        [
-#          "CMD-SHELL",
-#          "curl --fail --silent http://localhost:8184/actuator/health/readiness | grep UP || exit 1",
-#        ]
-#      interval: 10s
-#      timeout: 5s
-#      retries: 10
-#      start_period: 10s
-#    networks:
-#      - job-manager
+  media-service:
+    build:
+      context: .
+      dockerfile: JM-CompanyMediaService/Dockerfile
+      secrets:
+        - GITHUB_USERNAME
+        - GITHUB_KEY
+      cache_from:
+        - jm/company-media-service:latest
+    image: jm/company-media-service
+    container_name: jm-service-media
+    profiles:
+      - "all"
+    ports:
+      - "8184:8184"
+    env_file:
+      - ./.env
+    environment:
+      SERVER_PORT: 8184
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
+      SPRING_DATASOURCE_URL: jdbc:postgresql://media-db:5432/media_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      # =============== MEDIA GCS ===============
+      COMPANYMEDIA_GCS_BUCKET: ${COMPANYMEDIA_GCS_BUCKET}
+      COMPANYMEDIA_GCS_UPLOAD_PREFIX: ${COMPANYMEDIA_GCS_UPLOAD_PREFIX}
+      COMPANYMEDIA_GCS_SIGNED_URL_TTL_MINUTES: ${COMPANYMEDIA_GCS_SIGNED_URL_TTL_MINUTES}
+      GOOGLE_APPLICATION_CREDENTIALS: ${GOOGLE_APPLICATION_CREDENTIALS}
+      # =============== KAFKA & SCHEMA REGISTRY ===============
+      KAFKA_HOST_URL: kafka:29092
+      SCHEMA_REGISTRY_HOST_URL: http://schema-registry:9091
+      # =============== SECURITY ===============
+      # Key Pair
+      PUBLIC_KEY_B64: ${PUBLIC_KEY_B64}
+      PRIVATE_KEY_B64: ${PRIVATE_KEY_B64}
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PASSWORD:
+      REDIS_PORT: 6379
+      # Jwe Config
+      JWE_ISSUER: ${JWE_ISSUER}
+      JWE_TEMP_TOKEN_TTL: ${JWE_TEMP_TOKEN_TTL}
+      JWE_ACCESS_TOKEN_TTL: ${JWE_ACCESS_TOKEN_TTL}
+      JWE_REFRESH_TOKEN_TTL: ${JWE_REFRESH_TOKEN_TTL}
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
+      media-db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl --fail --silent http://localhost:8184/actuator/health/readiness | grep UP || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
 
   tag-service:
     build:
