@@ -42,7 +42,8 @@ services:
       - "all"
     ports:
       - "8072:8072"
-    env_file: ./.env
+    env_file:
+      - ./.env
     environment:
       EUREKA_INSTANCE_HOSTNAME: eureka-server
     depends_on:
@@ -50,18 +51,18 @@ services:
         condition: service_healthy
       auth-service:
         condition: service_healthy
-      profile-service:
+#      profile-service:
+#        condition: service_healthy
+      discovery-service:
         condition: service_healthy
-#      discovery-service:
-#        condition: service_healthy
-#      jobpost-service:
-#        condition: service_healthy
+      jobpost-service:
+        condition: service_healthy
 #      media-service:
 #        condition: service_healthy
-#      tag-service:
-#        condition: service_healthy
-#      subscription-service:
-#        condition: service_healthy
+      tag-service:
+        condition: service_healthy
+      subscription-service:
+        condition: service_healthy
       payment-service:
         condition: service_healthy
       notification-service:
