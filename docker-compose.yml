@@ -51,14 +51,14 @@ services:
         condition: service_healthy
       auth-service:
         condition: service_healthy
-#      profile-service:
-#        condition: service_healthy
+      profile-service:
+        condition: service_healthy
       discovery-service:
         condition: service_healthy
       jobpost-service:
         condition: service_healthy
-#      media-service:
-#        condition: service_healthy
+      media-service:
+        condition: service_healthy
       tag-service:
         condition: service_healthy
       subscription-service:
