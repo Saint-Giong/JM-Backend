@@ -166,6 +166,7 @@ services:
       JWE_TEMP_TOKEN_TTL: ${JWE_TEMP_TOKEN_TTL}
       JWE_ACCESS_TOKEN_TTL: ${JWE_ACCESS_TOKEN_TTL}
       JWE_REFRESH_TOKEN_TTL: ${JWE_REFRESH_TOKEN_TTL}
+      SPRING_ELASTICSEARCH_URIS: http://elasticsearch:9200
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -174,6 +175,8 @@ services:
       schema-registry:
         condition: service_healthy
       discovery-db:
+        condition: service_healthy
+      elasticsearch:
         condition: service_healthy
     healthcheck:
       test:
