@@ -53,16 +53,16 @@ services:
         condition: service_healthy
       profile-service:
         condition: service_healthy
-#      discovery-service:
-#        condition: service_healthy
-#      jobpost-service:
-#        condition: service_healthy
-#      media-service:
-#        condition: service_healthy
-#      tag-service:
-#        condition: service_healthy
-#      subscription-service:
-#        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+      jobpost-service:
+        condition: service_healthy
+      media-service:
+        condition: service_healthy
+      tag-service:
+        condition: service_healthy
+      subscription-service:
+        condition: service_healthy
 #      payment-service:
 #        condition: service_healthy
 #      notification-service:
