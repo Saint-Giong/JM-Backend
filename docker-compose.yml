@@ -128,7 +128,7 @@ services:
       - "all"
       - "infra"
     ports:
-      - "8888:8080"
+      - "9000:8080"
     restart: always
     environment:
       KAFKA_CLUSTERS_0_NAME: "kraft-cluster"
