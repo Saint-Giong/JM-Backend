@@ -86,9 +86,22 @@ services:
     environment:
       SERVER_PORT: 8181
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8070/eureka/
-      SPRING_DATASOURCE_URL: jdbc:postgresql://profile-db:5432/profile_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
+      # =============== PROFILE SHARDS ===============
+      SPRING_DATASOURCE_AFRICA_URL: jdbc:postgresql://profile-db-africa:5432/profile_africa
+      SPRING_DATASOURCE_AFRICA_USERNAME: postgres
+      SPRING_DATASOURCE_AFRICA_PASSWORD: postgres
+      SPRING_DATASOURCE_EUROPE_URL: jdbc:postgresql://profile-db-europe:5432/profile_europe
+      SPRING_DATASOURCE_EUROPE_USERNAME: postgres
+      SPRING_DATASOURCE_EUROPE_PASSWORD: postgres
+      SPRING_DATASOURCE_AMERICAS_URL: jdbc:postgresql://profile-db-americas:5432/profile_americas
+      SPRING_DATASOURCE_AMERICAS_USERNAME: postgres
+      SPRING_DATASOURCE_AMERICAS_PASSWORD: postgres
+      SPRING_DATASOURCE_EAST_ASIA_URL: jdbc:postgresql://profile-db-east-asia:5432/profile_east_asia
+      SPRING_DATASOURCE_EAST_ASIA_USERNAME: postgres
+      SPRING_DATASOURCE_EAST_ASIA_PASSWORD: postgres
+      SPRING_DATASOURCE_SOUTH_ASIA_OCEANIA_URL: jdbc:postgresql://profile-db-south-asia-oceania:5432/profile_south_asia_oceania
+      SPRING_DATASOURCE_SOUTH_ASIA_OCEANIA_USERNAME: postgres
+      SPRING_DATASOURCE_SOUTH_ASIA_OCEANIA_PASSWORD: postgres
       # =============== KAFKA & SCHEMA REGISTRY ===============
       KAFKA_HOST_URL: kafka:29092
       SCHEMA_REGISTRY_HOST_URL: http://schema-registry:9091
@@ -112,7 +125,15 @@ services:
         condition: service_healthy
       schema-registry:
         condition: service_healthy
-      profile-db:
+      profile-db-africa:
+        condition: service_healthy
+      profile-db-europe:
+        condition: service_healthy
+      profile-db-americas:
+        condition: service_healthy
+      profile-db-east-asia:
+        condition: service_healthy
+      profile-db-south-asia-oceania:
         condition: service_healthy
     healthcheck:
       test:

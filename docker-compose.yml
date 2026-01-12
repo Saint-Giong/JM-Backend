@@ -93,12 +93,7 @@ services:
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT"
-      # 1. CONTROLLER: 9093 (Quản lý Cluster)
-      # 2. PLAINTEXT: 29092 (Nội bộ Docker - Cho Schema Registry dùng)
-      # 3. PLAINTEXT_HOST: 9092 (Bên ngoài - Cho Spring Boot dùng)
       KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:29092,CONTROLLER://kafka:9093,PLAINTEXT_HOST://0.0.0.0:9092"
-      # - Nội bộ: kafka:29092
-      # - Bên ngoài: localhost:9092
       KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9192"
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
@@ -120,7 +115,7 @@ services:
       - kafka_data:/var/lib/kafka/data
     networks:
       - job-manager
-#
+
   kafka-ui:
     image: provectuslabs/kafka-ui
     container_name: jm-infra-kafka-ui
@@ -187,7 +182,7 @@ services:
     networks:
       - job-manager
 
-    # Kibana for Elasticsearch Visualization
+   # Kibana for Elasticsearch Visualization
   kibana:
     image: docker.elastic.co/kibana/kibana:9.0.0
     container_name: jm-infra-kibana-search

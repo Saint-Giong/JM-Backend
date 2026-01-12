@@ -1,0 +1,91 @@
+services:
+  # ============================= SHARDS (PostgreSQL) =============================
+  profile-db-africa:
+    image: postgres:latest
+    container_name: jm-db-profile-africa-shards
+    environment:
+      POSTGRES_DB: profile_africa
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5541:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d profile_africa || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
+
+  profile-db-europe:
+    image: postgres:latest
+    container_name: jm-db-profile-europe-shards
+    environment:
+      POSTGRES_DB: profile_europe
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5542:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d profile_europe || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
+
+  profile-db-americas:
+    image: postgres:latest
+    container_name: jm-db-profile-americas-shards
+    environment:
+      POSTGRES_DB: profile_americas
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5543:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d profile_americas || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
+
+  profile-db-east-asia:
+    image: postgres:latest
+    container_name: jm-db-profile-east-asia-shards
+    environment:
+      POSTGRES_DB: profile_east_asia
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5544:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d profile_east_asia || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager
+
+  profile-db-south-asia-oceania:
+    image: postgres:latest
+    container_name: jm-db-profile-south-asia-shards
+    environment:
+      POSTGRES_DB: profile_south_asia_oceania
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5545:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d profile_south_asia_oceania || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - job-manager

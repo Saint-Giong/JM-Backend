@@ -1,3 +1,6 @@
+include:
+  - docker-jm-profile-shards.yml
+
 services:
   # ============================= Databases =============================
   auth-db:
@@ -22,27 +25,27 @@ services:
     networks:
       - job-manager
 
-  profile-db:
-    image: postgres:latest
-    container_name: jm-db-profile
-    profiles:
-      - "all"
-      - "infra"
-      - "dbs"
-    ports:
-      - "5533:5432"
-    environment:
-      POSTGRES_DB: profile_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d profile_db || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
-    networks:
-      - job-manager
+#  profile-db:
+#    image: postgres:latest
+#    container_name: jm-db-profile
+#    profiles:
+#      - "all"
+#      - "infra"
+#      - "dbs"
+#    ports:
+#      - "5533:5432"
+#    environment:
+#      POSTGRES_DB: profile_db
+#      POSTGRES_USER: postgres
+#      POSTGRES_PASSWORD: postgres
+#    healthcheck:
+#      test: [ "CMD-SHELL", "pg_isready -U postgres -d profile_db || exit 1" ]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 10
+#      start_period: 10s
+#    networks:
+#      - job-manager
 
   discovery-db:
     image: postgres:latest
