@@ -165,7 +165,7 @@ services:
     container_name: jm-infra-elastic-search
     ports:
       - "9201:9200"
-      - "9300:9300"
+      - "9400:9400"
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
