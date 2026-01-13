@@ -344,6 +344,8 @@ services:
       timeout: 5s
       retries: 10
       start_period: 10s
+    volumes:
+      - ./secrets/gcp-sa.json:/secrets/gcp-sa.json:ro
     networks:
       - job-manager
 
