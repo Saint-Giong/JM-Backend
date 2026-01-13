@@ -36,3 +36,6 @@ build/
 ### Maven ###
 *.versionsBackup
 **/*.versionsBackup
+
+### Secrets ###
+secrets/
