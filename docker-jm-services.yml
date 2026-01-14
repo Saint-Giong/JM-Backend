@@ -556,6 +556,7 @@ services:
       - "all"
     ports:
       - "8188:8188"
+      - "9092:9092" # WebSocket port for notification # WebSocket port do not erase :((
     env_file:
       - ./.env
     environment:
